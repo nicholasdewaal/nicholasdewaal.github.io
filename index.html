@@ -1,88 +1,87 @@
-<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>2048</title>
+    <head>
+    </head>
+    <body>
+        <h1>
+            Casos de COVID-19 en Peru por Departamento
+        </h1>
+        <a href="AMAZONAS/AMAZONAS.html">
+            <img src="AMAZONAS.png">
+        </a>
+        <a href="ANCASH/ANCASH.html">
+            <img src="ANCASH.png">
+        </a>
+        <a href="APURIMAC/APURIMAC.html">
+            <img src="APURIMAC.png">
+        </a>
+        <a href="AREQUIPA/AREQUIPA.html">
+            <img src="AREQUIPA.png">
+        </a>
+        <a href="AYACUCHO/AYACUCHO.html">
+            <img src="AYACUCHO.png">
+        </a>
+        <a href="CAJAMARCA/CAJAMARCA.html">
+            <img src="CAJAMARCA.png">
+        </a>
+        <a href="CALLAO/CALLAO.html">
+            <img src="CALLAO.png">
+        </a>
+        <a href="CUSCO/CUSCO.html">
+            <img src="CUSCO.png">
+        </a>
+        <a href="HUANCAVELICA/HUANCAVELICA.html">
+            <img src="HUANCAVELICA.png">
+        </a>
+        <a href="HUANUCO/HUANUCO.html">
+            <img src="HUANUCO.png">
+        </a>
+        <a href="ICA/ICA.html">
+            <img src="ICA.png">
+        </a>
+        <a href="JUNIN/JUNIN.html">
+            <img src="JUNIN.png">
+        </a>
+        <a href="LA LIBERTAD/LA LIBERTAD.html">
+            <img src="LA LIBERTAD.png">
+        </a>
+        <a href="LAMBAYEQUE/LAMBAYEQUE.html">
+            <img src="LAMBAYEQUE.png">
+        </a>
+        <a href="LIMA/LIMA.html">
+            <img src="LIMA.png">
+        </a>
+        <a href="LORETO/LORETO.html">
+            <img src="LORETO.png">
+        </a>
+        <a href="MADRE DE DIOS/MADRE DE DIOS.html">
+            <img src="MADRE DE DIOS.png">
+        </a>
+        <a href="MOQUEGUA/MOQUEGUA.html">
+            <img src="MOQUEGUA.png">
+        </a>
+        <a href="PASCO/PASCO.html">
+            <img src="PASCO.png">
+        </a>
+        <a href="PIURA/PIURA.html">
+            <img src="PIURA.png">
+        </a>
+        <a href="PUNO/PUNO.html">
+            <img src="PUNO.png">
+        </a>
+        <a href="SAN MARTIN/SAN MARTIN.html">
+            <img src="SAN MARTIN.png">
+        </a>
+        <a href="TACNA/TACNA.html">
+            <img src="TACNA.png">
+        </a>
+        <a href="TUMBES/TUMBES.html">
+            <img src="TUMBES.png">
+        </a>
+        <a href="UCAYALI/UCAYALI.html">
+            <img src="UCAYALI.png">
 
-  <link href="style/main.css" rel="stylesheet" type="text/css">
-  <link rel="shortcut icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+    </body>
 
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
-</head>
-<body>
-  <div class="container">
-    <div class="heading">
-      <h1 class="title">Amber</h1>
-      <div class="scores-container">
-        <div class="score-container">0</div>
-        <div class="best-container">0</div>
-      </div>
-    </div>
 
-    <div class="above-game">
-      <p class="game-intro">Join the pictures to see Amber grow!</strong></p>
-      <a class="restart-button">New Game</a>
-    </div>
 
-    <div class="game-container">
-      <div class="game-message">
-        <p></p>
-        <div class="lower">
-	        <a class="keep-playing-button">Keep going</a>
-          <a class="retry-button">Try again</a>
-        </div>
-      </div>
-
-      <div class="grid-container">
-        <div class="grid-row">
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-        </div>
-        <div class="grid-row">
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-        </div>
-        <div class="grid-row">
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-        </div>
-        <div class="grid-row">
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-          <div class="grid-cell"></div>
-        </div>
-      </div>
-
-      <div class="tile-container">
-
-      </div>
-    </div>
-
-    <p class="game-explanation">
-      <strong class="important">How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same picture touch, they <strong>merge into one!</strong>
-    </p>
-  </div>
-
-  <script src="js/bind_polyfill.js"></script>
-  <script src="js/classlist_polyfill.js"></script>
-  <script src="js/animframe_polyfill.js"></script>
-  <script src="js/keyboard_input_manager.js"></script>
-  <script src="js/html_actuator.js"></script>
-  <script src="js/grid.js"></script>
-  <script src="js/tile.js"></script>
-  <script src="js/local_storage_manager.js"></script>
-  <script src="js/game_manager.js"></script>
-  <script src="js/application.js"></script>
-</body>
 </html>
