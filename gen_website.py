@@ -1,5 +1,6 @@
 
 import os
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -64,7 +65,16 @@ df_pos.DISTRITO = df_pos.DISTRITO.str.replace('Ó', 'O')
 df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ó', 'O')
 
 
-all_departments = list(df_pos.DEPARTAMENTO.unique())
+try:
+    arg = sys.argv[1]
+except:
+    pass
+
+if arg == "noimages":
+    all_departments = list()
+else:
+    all_departments = list(df_pos.DEPARTAMENTO.unique())
+
 total_cases = dict()  # total cases by district
 
 # Department > Provinces > Districts
@@ -101,6 +111,7 @@ for department in all_departments:
     add_line(department_link, "<html>\n    <head>\n    </head>\n    <body>")
     add_line(department_link, "<h1>Casos de COVID-19 en " + department + " por Provincia</h1>")
     add_line(department_link, "<h2>\n    Selecciona la foto de una Provincia para ver sus detalles por Distrito.\n</h2>")
+    add_line(department_link, "<h3>\n    <a href=../index.html>Regresar a casos por Departamento</a>\n</h3>")
 
     for image in department_images:
         if image[-3:] == "png" and image[:6] != "EN INV":
@@ -120,6 +131,7 @@ for department in all_departments:
             province_images = fetch_png_list(department + '/' + province)
             add_line(province_link, "<html>\n    <head>\n    </head>\n    <body>")
             add_line(province_link, "<h1>Casos de COVID-19 en " + department +" / " + province + " por Distrito</h1>")
+            add_line(province_link, "<h3>\n    <a href=../../index.html>Regresar a casos por Departamento</a>\n</h3>")
             for image in province_images:
                 if image[-3:] == "png" and image[:6] != "EN INV":
                     add_line(province_link, '        <img src="' + image + '">')
