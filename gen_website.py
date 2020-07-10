@@ -100,6 +100,7 @@ for department in all_departments:
 
     add_line(department_link, "<html>\n    <head>\n    </head>\n    <body>")
     add_line(department_link, "<h1>Casos de COVID-19 en " + department + " por Provincia</h1>")
+    add_line(department_link, "<h2>\n    Selecciona la foto de una Provincia para ver sus detalles por Distrito.\n</h2>")
 
     for image in department_images:
         if image[-3:] == "png" and image[:6] != "EN INV":
