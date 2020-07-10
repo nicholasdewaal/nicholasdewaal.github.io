@@ -29,25 +29,24 @@ def make_dir(in_path):
 
 
 def gen_plot(df_in, save_path):
-    if df_in.shape[0] > 80: # must have at least 80 cases to be worth it
-        df_bars = df_in.groupby([df_in.FECHA_RESULTADO]).size()
-        #df_bars = df_bars[df_bars.index > datetime.datetime(2020, 6, 15)]
-        df_avg = df_bars.rolling(7).mean()
-        df_avg.name = "Por medio de los 7 dias anteriores"
-        fig, ax = plt.subplots()
-        plt.xlabel("Fecha")
-        plt.ylabel("Casos Nuevos Detectados")
-        ax.bar(df_bars.index, df_bars.values)
-        df_avg.plot(ax=ax, color="green", title="Casos Nuevos Detectados en " + save_path, legend=True)
-        plt.tight_layout()
-        x_axis = ax.axes.get_xaxis()
-        y_axis = ax.axes.get_yaxis()
-        x_label = x_axis.get_label()
-        y_label = y_axis.get_label()
-        x_label.set_visible(False)
-        y_label.set_visible(False)
-        plt.savefig(save_path + ".png", dpi=120)
-        plt.clf()
+    df_bars = df_in.groupby([df_in.FECHA_RESULTADO]).size()
+    #df_bars = df_bars[df_bars.index > datetime.datetime(2020, 6, 15)]
+    df_avg = df_bars.rolling(7).mean()
+    df_avg.name = "Por medio de los 7 dias anteriores"
+    fig, ax = plt.subplots()
+    plt.xlabel("Fecha")
+    plt.ylabel("Casos Nuevos Detectados")
+    ax.bar(df_bars.index, df_bars.values)
+    df_avg.plot(ax=ax, color="green", title="Casos Nuevos Detectados en " + save_path, legend=True)
+    plt.tight_layout()
+    x_axis = ax.axes.get_xaxis()
+    y_axis = ax.axes.get_yaxis()
+    x_label = x_axis.get_label()
+    y_label = y_axis.get_label()
+    x_label.set_visible(False)
+    y_label.set_visible(False)
+    plt.savefig(save_path + ".png", dpi=120)
+    plt.clf()
 
 
 df_pos = pd.read_csv("positivos_covid.csv", encoding = "ISO-8859-1")
@@ -68,7 +67,7 @@ df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ó', 'O')
 try:
     arg = sys.argv[1]
 except:
-    pass
+    arg = ""
 
 if arg == "noimages":
     all_departments = list()
