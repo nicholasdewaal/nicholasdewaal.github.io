@@ -29,24 +29,25 @@ def make_dir(in_path):
 
 
 def gen_plot(df_in, save_path):
-    df_bars = df_in.groupby([df_in.FECHA_RESULTADO]).size()
-    #df_bars = df_bars[df_bars.index > datetime.datetime(2020, 6, 15)]
-    df_avg = df_bars.rolling(7).mean()
-    df_avg.name = "Por medio de los 7 dias anteriores"
-    fig, ax = plt.subplots()
-    plt.xlabel("Fecha")
-    plt.ylabel("Casos Nuevos Detectados")
-    ax.bar(df_bars.index, df_bars.values)
-    df_avg.plot(ax=ax, color="green", title="Casos Nuevos Detectados en " + save_path, legend=True)
-    plt.tight_layout()
-    x_axis = ax.axes.get_xaxis()
-    y_axis = ax.axes.get_yaxis()
-    x_label = x_axis.get_label()
-    y_label = y_axis.get_label()
-    x_label.set_visible(False)
-    y_label.set_visible(False)
-    plt.savefig(save_path + ".png", dpi=120)
-    plt.clf()
+    if df_in.shape[0] > 20:
+        df_bars = df_in.groupby([df_in.FECHA_RESULTADO]).size()
+        #df_bars = df_bars[df_bars.index > datetime.datetime(2020, 6, 15)]
+        df_avg = df_bars.rolling(7).mean()
+        df_avg.name = "Por medio de los 7 dias anteriores"
+        fig, ax = plt.subplots()
+        # plt.xlabel("Fecha")
+        # plt.ylabel("Casos Nuevos Detectados")
+        df_avg.plot(ax=ax, color="green", title="Casos Nuevos Detectados en " + save_path, legend=True)
+        ax.bar(df_bars.index, df_bars.values)
+        plt.tight_layout()
+        x_axis = ax.axes.get_xaxis()
+        y_axis = ax.axes.get_yaxis()
+        x_label = x_axis.get_label()
+        y_label = y_axis.get_label()
+        x_label.set_visible(False)
+        # y_label.set_visible(False)
+        plt.savefig(save_path + ".png", dpi=120)
+        plt.clf()
 
 
 df_pos = pd.read_csv("positivos_covid.csv", encoding = "ISO-8859-1")
@@ -113,9 +114,13 @@ for department in all_departments:
     add_line(department_link, "<h3>\n    <a href=../index.html>Regresar a casos por Departamento</a>\n</h3>")
 
     for image in department_images:
+        # Exclude generating html links of images of EN INVESTIGACION and those that are not png files.
         if image[-3:] == "png" and image[:6] != "EN INV":
+            # dist_image_num = len(os.listdir(department + '/' + province))
+            # if dist_image_num > 0:
             add_line(department_link, '        <a href="' + image[:-4] + '/'  + image[:-3] + 'html">')
             add_line(department_link, '            <img src="' + image + '">')
+            # if dist_image_num > 0:
             add_line(department_link, r'        </a>')
 
     add_line(department_link, "    </body>")
