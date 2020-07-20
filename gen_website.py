@@ -4,6 +4,8 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 
+attribution = '</br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
+attribution += '</br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
 
 def add_line(in_file, line):
     with open(in_file, 'a') as file:
@@ -123,6 +125,7 @@ for department in all_departments:
             # if dist_image_num > 0:
             add_line(department_link, r'        </a>')
 
+    add_line(department_link, attribution)
     add_line(department_link, "    </body>")
     add_line(department_link, "</html>")
 
@@ -140,4 +143,5 @@ for department in all_departments:
                 if image[-3:] == "png" and image[:6] != "EN INV":
                     add_line(province_link, '        <img src="' + image + '">')
 
+            add_line(province_link, attribution)
             add_line(province_link, "</body>\n</html>")
