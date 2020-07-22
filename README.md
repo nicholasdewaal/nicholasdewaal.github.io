@@ -1,5 +1,5 @@
 # nicholasdewaal.github.io
-COVID-19 case growth by Region in Peru
+COVID-19 case growth by region in Peru
 
 In order to generate all of the images and website for the most recent growth in cases in Peru by Departamento/Provincia/Distrito, download the data from the Ministerio de Salud in Peru here:
 
