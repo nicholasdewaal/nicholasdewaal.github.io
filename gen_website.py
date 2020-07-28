@@ -9,10 +9,23 @@ attribution = '</br> Fuente de los datos utilizados: <a href="https://www.datosa
 attribution += '</br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
 attribution += '</br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
 
+# Some constants used for image names
+danger_img_name = "_peligro.png"
+len_danger = len(danger_img_name)
+casenum_img_nm = "_casos_total.png"
+len_casenum = len(casenum_img_nm)
 
 def add_line(in_file, line):
     with open(in_file, 'a') as file:
         file.write('\n' + line)
+
+
+def titulo(in_str):
+    '''
+    turn a string into a Spanish title
+    use title to make lower case non-beginning letters and make De de
+    '''
+    return in_str.title().replace("De", "de")
 
 
 def fetch_png_list(in_path):
@@ -33,39 +46,45 @@ def make_dir(in_path):
 
 
 def gen_plot(df_in, save_path):
+    '''
+    Build and save plot for the number of cases as a bar plot along with its
+    7-day average.
+    df_in is a pandas dataframe with the number of cases by date
+    save_path is the path to save the plot (string)
+    '''
     if df_in.shape[0] > 20:
         df_bars = df_in.groupby([df_in.FECHA_RESULTADO]).size()
-        #df_bars = df_bars[df_bars.index > datetime.datetime(2020, 6, 15)]
         df_avg = df_bars.rolling(7).mean()
         df_avg.name = "Por medio de los 7 dias anteriores"
         fig, ax = plt.subplots()
-        # plt.xlabel("Fecha")
-        # plt.ylabel("Casos Nuevos Detectados")
         df_avg.plot(
             ax=ax,
             color="green",
             title="Casos Nuevos Detectados en " +
-            save_path,
+            titulo(save_path),
             legend=True)
         ax.bar(df_bars.index, df_bars.values)
         plt.tight_layout()
         x_axis = ax.axes.get_xaxis()
-        # y_axis = ax.axes.get_yaxis()
         x_label = x_axis.get_label()
-        # y_label = y_axis.get_label()
         x_label.set_visible(False)
-        # y_label.set_visible(False)
         plt.savefig(save_path + ".png", dpi=120)
         plt.clf()
 
 
 def sort_dict(in_dict, reverse=False, multiply_factor=1):
+    '''
+    Sort in_dict by its values, and multiply values by multiply_factor
+    '''
     return {k: round(v * multiply_factor, 1) for k, v in sorted(in_dict.items(), key=lambda item: item[1], reverse=reverse)}
 
 
 def clr(in_num):
     '''
-    Define color based on ranges of numbers
+    Define color for plots based on ranges of new weekly covid-19 cases per
+    100000 people in a region.
+    Red means high risk is above 17, orange above 10, yellow above 5, green
+    otherwise.
     '''
     if in_num > 17:
         return "red"
@@ -76,8 +95,41 @@ def clr(in_num):
     return "green"
 
 
+def bar_h_covid(in_plot_dict, figure_txt, save_path,
+                limit_extremes=False, colorize=False):
+    '''
+    Horizontal bar plot of covid-19 cases per 100000 saved in save_path
+    limit_extremes: set to True if you want to limit extremely long plot bars.
+    colorize: set to True if you want to color bars by covid danger.
+    '''
+    plot_dict = sort_dict(in_plot_dict, multiply_factor=100000)
+    width = 8 # width of plot
+    num_bars = len(plot_dict)
+    n_chars_plot = 16
+
+    if num_bars > 0:
+        plt.subplots(figsize=(width, num_bars / 6 + 1.7))
+        # Limit max length of extreme values in bar plot to 2.5 times
+        # average value size / bar length
+        legend, values = zip(*plot_dict.items())
+        legend = [titulo(x[:n_chars_plot]) for x in legend]
+        if limit_extremes:
+            value_average = sum(values) / len(values)
+            if max(values) / 2 > value_average:
+                plot_limit = min(max(values) / 2, 2.5 * value_average)
+                plt.xlim(0, plot_limit)
+
+        plt.figtext(.5,.9, figure_txt, fontsize=14, ha='center')
+        if colorize:
+            plt.barh(legend, values, color=list(map(clr, values)))
+        else:
+            plt.barh(legend, values)
+        plt.savefig(save_path)
+        plt.close()
+
+
+# Make dataframes from csv files.
 df_pos = pd.read_csv("positivos_covid.csv", encoding="ISO-8859-1")
-#df_dead = pd.read_csv("fallecidos_covid.csv", encoding = "ISO-8859-1")
 df_pop = pd.read_csv("PoblacionPeru2020.csv", encoding = "ISO-8859-1")
 
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
@@ -130,10 +182,10 @@ for department in all_departments:
 
 #-------------------------Create plots for per capita results----------------------------
 
-if arg == "noimages":
-    all_departments = list()
-else:
-    all_departments = list(df_pop.DEPARTAMENTO.unique())
+# if arg == "noimages":
+    # all_departments = list()
+# else:
+all_departments = list(df_pop.DEPARTAMENTO.unique())
 
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 
@@ -166,54 +218,25 @@ for department in all_departments:
 
                 if district_sizes[district] > 0 and not(np.isnan(df_avg[-1])):
                     district_risk_factor = df_avg[-1] / district_sizes[district]
-
-                    #if np.isnan(district_risk_factor):
-                     #   set_trace()
                     district_risks[district] = district_risk_factor
-                    #set_trace()
 
             except:
                 failed_districts.append((district, df_pop[df_pop.PROVINCIA==province][df_pop.DISTRITO==district].Population.values[0]))
 
         print(province, district_risks)
-        plot_dict = sort_dict(district_risks, multiply_factor=100000)
-        print('plot:', plot_dict)
-        #if province == "HUAROCHIRI":
-         #   set_trace()
-        num_bars = len(plot_dict)
-        width = 8
-        if num_bars > 0:
-            legend, values = zip(*plot_dict.items())
-            legend = [x[:16].title().replace("De", "de") for x in legend]
-            plt.subplots(figsize=(width, num_bars/6 + 1.7))
 
-            if max(values) / 2 > sum(values) / len(values):
-                plot_limit = min(max(values) / 2, 2.5 * sum(values) / len(values))
-                plt.xlim(0, plot_limit)
-
-            plt.figtext(.5,.9,'Positivos de Ultima Semana por 100,000 (Sospecho de Peligro Actual)', fontsize=14, ha='center')
-            plt.barh(legend, values, color=list(map(clr, values)))
-            try:
-                plt.savefig(department + '/' + province + '/' + province + "_peligro.png")
-                plt.close()
-
-            except: # when Lima region shows up
-                plt.savefig(department + ' REGION/' + province + '/' + province + "_peligro.png")
-                plt.close()
-
-        plot_dict2 = sort_dict(total_positive, multiply_factor=100000)
-        num_bars = len(plot_dict2)
-        if num_bars > 0:
-            plt.subplots(figsize=(width, num_bars/6 + 1.7))
-            legend, values = zip(*plot_dict2.items())
-            legend = [x[:16].title().replace("De", "de") for x in legend]
-            plt.figtext(.5,.9,'Total de Casos Historicos Detectados por 100,000 Personas', fontsize=14, ha='center')
-            plt.barh(legend, values)
-            try:
-                plt.savefig(department + '/' + province + '/' + province + "_casos_total.png")
-            except: # when Lima region shows up
-                plt.savefig(department + ' REGION/' + province + '/' + province + "_casos_total.png")
-            plt.close()
+        try:
+            cases_text1 = 'Positivos de Ultima Semana por 100,000 (Sospecho de Peligro Actual)'
+            cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Personas'
+            cases_path1 = department + '/' + province + '/' + province + danger_img_name
+            cases_path2 = department + '/' + province + '/' + province + casenum_img_nm
+            bar_h_covid(district_risks, cases_text1, cases_path1, True, True)
+            bar_h_covid(total_positive, cases_text2, cases_path2)
+        except: # when Lima region shows up
+            cases_path1 = department + ' REGION/' + province + '/' + province + danger_img_name
+            cases_path2 = department + ' REGION/' + province + '/' + province + casenum_img_nm
+            bar_h_covid(district_risks, cases_text1, cases_path1, True, True)
+            bar_h_covid(total_positive, cases_text2, cases_path2)
 
 
 #-------------------------Create all html pages----------------------------
@@ -277,11 +300,12 @@ for department in all_departments:
                 "<h3>\n    <a href=../../index.html>Regresar a casos por Departamento</a>\n</h3>")
 
             for image in province_images:
-                risk_image = (image[-16:] == '_casos_total.png' or image[-12:] == '_peligro.png')
+                # Place summary images 1st.
+                risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if risk_image:
                     add_line(province_link, '        <img src="' + image + '">')
             for image in province_images:
-                risk_image = (image[-16:] == '_casos_total.png' or image[-12:] == '_peligro.png')
+                risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if image[-3:] == "png" and image[:6] != "EN INV" and not(risk_image):
                     add_line(
                         province_link,
