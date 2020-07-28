@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 attribution = '</br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
+attribution += '</br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
 attribution += '</br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
 
 
@@ -49,7 +50,7 @@ def gen_plot(df_in, save_path):
         ax.bar(df_bars.index, df_bars.values)
         plt.tight_layout()
         x_axis = ax.axes.get_xaxis()
-        y_axis = ax.axes.get_yaxis()
+        # y_axis = ax.axes.get_yaxis()
         x_label = x_axis.get_label()
         # y_label = y_axis.get_label()
         x_label.set_visible(False)
@@ -80,7 +81,7 @@ df_pos = pd.read_csv("positivos_covid.csv", encoding="ISO-8859-1")
 df_pop = pd.read_csv("PoblacionPeru2020.csv", encoding = "ISO-8859-1")
 
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
-    df_pos['FECHA_RESULTADO'], format="%d/%m/%Y")
+    df_pos['FECHA_RESULTADO'], format="%Y%m%d")
 
 df_pos.DISTRITO = df_pos.DISTRITO.str.replace('Ñ', 'N')
 df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ñ', 'N')
@@ -134,6 +135,8 @@ if arg == "noimages":
 else:
     all_departments = list(df_pop.DEPARTAMENTO.unique())
 
+plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
+
 failed_districts = list()
 
 for department in all_departments:
@@ -177,10 +180,12 @@ for department in all_departments:
         print('plot:', plot_dict)
         #if province == "HUAROCHIRI":
          #   set_trace()
-        if len(plot_dict) > 2:
+        num_bars = len(plot_dict)
+        width = 8
+        if num_bars > 0:
             legend, values = zip(*plot_dict.items())
-            legend = [x[:18] for x in legend]
-            plt.subplots(figsize=(8, 6))
+            legend = [x[:16].title().replace("De", "de") for x in legend]
+            plt.subplots(figsize=(width, num_bars/6 + 1.7))
 
             if max(values) / 2 > sum(values) / len(values):
                 plot_limit = min(max(values) / 2, 2.5 * sum(values) / len(values))
@@ -197,10 +202,11 @@ for department in all_departments:
                 plt.close()
 
         plot_dict2 = sort_dict(total_positive, multiply_factor=100000)
-        if len(plot_dict2) > 2:
-            plt.subplots(figsize=(8, 6))
+        num_bars = len(plot_dict2)
+        if num_bars > 0:
+            plt.subplots(figsize=(width, num_bars/6 + 1.7))
             legend, values = zip(*plot_dict2.items())
-            legend = [x[:18] for x in legend]
+            legend = [x[:16].title().replace("De", "de") for x in legend]
             plt.figtext(.5,.9,'Total de Casos Historicos Detectados por 100,000 Personas', fontsize=14, ha='center')
             plt.barh(legend, values)
             try:
