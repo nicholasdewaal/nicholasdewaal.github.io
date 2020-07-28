@@ -191,7 +191,7 @@ for department in all_departments:
                 plot_limit = min(max(values) / 2, 2.5 * sum(values) / len(values))
                 plt.xlim(0, plot_limit)
 
-            plt.figtext(.5,.9,'Positivos Actuales Diaros por 100,000 (Sospecho de Peligro Actual)', fontsize=14, ha='center')
+            plt.figtext(.5,.9,'Positivos de Ultima Semana por 100,000 (Sospecho de Peligro Actual)', fontsize=14, ha='center')
             plt.barh(legend, values, color=list(map(clr, values)))
             try:
                 plt.savefig(department + '/' + province + '/' + province + "_peligro.png")
