@@ -303,13 +303,13 @@ for department in all_departments:
                 # Place summary images 1st.
                 risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if risk_image:
-                    add_line(province_link, '      <img src="' + image + '">')
+                    add_line(province_link, '    <img src="' + image + '">')
             for image in province_images:
                 risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if image[-3:] == "png" and image[:6] != "EN INV" and not(risk_image):
                     add_line(
                         province_link,
-                        '      <img src="' +
+                        '    <img src="' +
                         image +
                         '">')
 
