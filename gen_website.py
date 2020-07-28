@@ -5,9 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-attribution = '</br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
-attribution += '</br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
-attribution += '</br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
+attribution = '    </br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
+attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
+attribution += '\n    </br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
 
 # Some constants used for image names
 danger_img_name = "_peligro.png"
@@ -182,10 +182,10 @@ for department in all_departments:
 
 #-------------------------Create plots for per capita results----------------------------
 
-# if arg == "noimages":
-    # all_departments = list()
-# else:
-all_departments = list(df_pop.DEPARTAMENTO.unique())
+if arg == "noimages":
+    all_departments = list()
+else:
+    all_departments = list(df_pop.DEPARTAMENTO.unique())
 
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 
@@ -249,18 +249,18 @@ for department in all_departments:
     os.mknod(department_link)
     department_images = fetch_png_list(department)
 
-    add_line(department_link, "<html>\n    <head>\n    </head>\n    <body>")
+    add_line(department_link, "<html>\n  <head>\n  </head>\n  <body>")
     add_line(
         department_link,
-        "<h1>Casos de COVID-19 en " +
+        "    <h1>Casos de COVID-19 en " +
         department +
         " por Provincia</h1>")
     add_line(
         department_link,
-        "<h2>\n    Seleccione la foto de una Provincia para ver sus detalles por Distrito.\n</h2>")
+        "    <h2>Seleccione la foto de una Provincia para ver sus detalles por Distrito.</h2>")
     add_line(
         department_link,
-        "<h3>\n    <a href=../index.html>Regresar a casos por Departamento</a>\n</h3>")
+        "    <h3>\n      <a href=../index.html>Regresar a casos por Departamento</a>\n    </h3>")
 
     for image in department_images:
         # Exclude generating html links of images of EN INVESTIGACION and those
@@ -268,14 +268,14 @@ for department in all_departments:
         if image[-3:] == "png" and image[:6] != "EN INV":
             # dist_image_num = len(os.listdir(department + '/' + province))
             # if dist_image_num > 0:
-            add_line(department_link, '        <a href="' +
+            add_line(department_link, '    <a href="' +
                      image[:-4] + '/' + image[:-3] + 'html">')
-            add_line(department_link, '            <img src="' + image + '">')
+            add_line(department_link, '      <img src="' + image + '">')
             # if dist_image_num > 0:
-            add_line(department_link, r'        </a>')
+            add_line(department_link, r'    </a>')
 
     add_line(department_link, attribution)
-    add_line(department_link, "    </body>")
+    add_line(department_link, "  </body>")
     add_line(department_link, "</html>")
 
     all_provinces = next(os.walk(department))[1]
@@ -287,29 +287,29 @@ for department in all_departments:
             province_images = fetch_png_list(department + '/' + province)
             add_line(
                 province_link,
-                "<html>\n    <head>\n    </head>\n    <body>")
+                "<html>\n  <head>\n  </head>\n  <body>")
             add_line(
                 province_link,
-                "<h1>Casos de COVID-19 en " +
+                "    <h1>Casos de COVID-19 en " +
                 department +
                 " / " +
                 province +
                 " por Distrito</h1>")
             add_line(
                 province_link,
-                "<h3>\n    <a href=../../index.html>Regresar a casos por Departamento</a>\n</h3>")
+                "    <h3>\n      <a href=../../index.html>Regresar a casos por Departamento</a>\n    </h3>")
 
             for image in province_images:
                 # Place summary images 1st.
                 risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if risk_image:
-                    add_line(province_link, '        <img src="' + image + '">')
+                    add_line(province_link, '      <img src="' + image + '">')
             for image in province_images:
                 risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if image[-3:] == "png" and image[:6] != "EN INV" and not(risk_image):
                     add_line(
                         province_link,
-                        '        <img src="' +
+                        '      <img src="' +
                         image +
                         '">')
 
