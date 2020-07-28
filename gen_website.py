@@ -3,6 +3,7 @@ import os
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 attribution = '</br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
 attribution += '</br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
@@ -57,8 +58,26 @@ def gen_plot(df_in, save_path):
         plt.clf()
 
 
+def sort_dict(in_dict, reverse=False, multiply_factor=1):
+    return {k: round(v * multiply_factor, 1) for k, v in sorted(in_dict.items(), key=lambda item: item[1], reverse=reverse)}
+
+
+def clr(in_num):
+    '''
+    Define color based on ranges of numbers
+    '''
+    if in_num > 17:
+        return "red"
+    elif in_num > 10:
+        return "orange"
+    elif in_num > 5:
+        return "yellow"
+    return "green"
+
+
 df_pos = pd.read_csv("positivos_covid.csv", encoding="ISO-8859-1")
 #df_dead = pd.read_csv("fallecidos_covid.csv", encoding = "ISO-8859-1")
+df_pop = pd.read_csv("PoblacionPeru2020.csv", encoding = "ISO-8859-1")
 
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
     df_pos['FECHA_RESULTADO'], format="%d/%m/%Y")
@@ -108,6 +127,90 @@ for department in all_departments:
             total_cases[district] = df_district.shape[0]
             gen_plot(df_district, save_path)
 
+#-------------------------Create plots for per capita results----------------------------
+
+if arg == "noimages":
+    all_departments = list()
+else:
+    all_departments = list(df_pop.DEPARTAMENTO.unique())
+
+failed_districts = list()
+
+for department in all_departments:
+    all_provinces = list(df_pop[df_pop.DEPARTAMENTO==department].PROVINCIA.unique())
+
+    for province in all_provinces:
+        districts = df_pop[df_pop.PROVINCIA==province].DISTRITO.unique()
+
+        total_positive = dict()
+        districts = list(districts)
+        districts.sort()
+        district_sizes = dict() # population of a district
+        district_risks = dict() # risk level by district
+
+        for district in districts:
+
+            df_district = df_pos[df_pos.PROVINCIA==province][df_pos.DISTRITO==district]
+            df_bars = df_district.groupby([df_district.FECHA_RESULTADO]).size()
+            df_avg = df_bars.rolling(7).mean()
+
+            try:
+                district_size = df_pop[df_pop.PROVINCIA==province][df_pop.DISTRITO==district].Population.values[0]
+                factor = df_district.shape[0] / district_size
+                if factor > 0:
+                    district_sizes[district] = district_size
+                    total_positive[district] = factor
+
+                if district_sizes[district] > 0 and not(np.isnan(df_avg[-1])):
+                    district_risk_factor = df_avg[-1] / district_sizes[district]
+
+                    #if np.isnan(district_risk_factor):
+                     #   set_trace()
+                    district_risks[district] = district_risk_factor
+                    #set_trace()
+
+            except:
+                failed_districts.append((district, df_pop[df_pop.PROVINCIA==province][df_pop.DISTRITO==district].Population.values[0]))
+
+        print(province, district_risks)
+        plot_dict = sort_dict(district_risks, multiply_factor=100000)
+        print('plot:', plot_dict)
+        #if province == "HUAROCHIRI":
+         #   set_trace()
+        if len(plot_dict) > 2:
+            legend, values = zip(*plot_dict.items())
+            legend = [x[:18] for x in legend]
+            plt.subplots(figsize=(8, 6))
+
+            if max(values) / 2 > sum(values) / len(values):
+                plot_limit = min(max(values) / 2, 2.5 * sum(values) / len(values))
+                plt.xlim(0, plot_limit)
+
+            plt.figtext(.5,.9,'Positivos Actuales Diaros por 100,000 (Sospecho de Peligro Actual)', fontsize=14, ha='center')
+            plt.barh(legend, values, color=list(map(clr, values)))
+            try:
+                plt.savefig(department + '/' + province + '/' + province + "_peligro.png")
+                plt.close()
+
+            except: # when Lima region shows up
+                plt.savefig(department + ' REGION/' + province + '/' + province + "_peligro.png")
+                plt.close()
+
+        plot_dict2 = sort_dict(total_positive, multiply_factor=100000)
+        if len(plot_dict2) > 2:
+            plt.subplots(figsize=(8, 6))
+            legend, values = zip(*plot_dict2.items())
+            legend = [x[:18] for x in legend]
+            plt.figtext(.5,.9,'Total de Casos Historicos Detectados por 100,000 Personas', fontsize=14, ha='center')
+            plt.barh(legend, values)
+            try:
+                plt.savefig(department + '/' + province + '/' + province + "_casos_total.png")
+            except: # when Lima region shows up
+                plt.savefig(department + ' REGION/' + province + '/' + province + "_casos_total.png")
+            plt.close()
+
+
+#-------------------------Create all html pages----------------------------
 
 all_departments = next(os.walk("."))[1]
 
@@ -166,8 +269,14 @@ for department in all_departments:
             add_line(
                 province_link,
                 "<h3>\n    <a href=../../index.html>Regresar a casos por Departamento</a>\n</h3>")
+
             for image in province_images:
-                if image[-3:] == "png" and image[:6] != "EN INV":
+                risk_image = (image[-16:] == '_casos_total.png' or image[-12:] == '_peligro.png')
+                if risk_image:
+                    add_line(province_link, '        <img src="' + image + '">')
+            for image in province_images:
+                risk_image = (image[-16:] == '_casos_total.png' or image[-12:] == '_peligro.png')
+                if image[-3:] == "png" and image[:6] != "EN INV" and not(risk_image):
                     add_line(
                         province_link,
                         '        <img src="' +
