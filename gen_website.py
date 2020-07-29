@@ -130,7 +130,7 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
 
 # Make dataframes from csv files.
 df_pos = pd.read_csv("positivos_covid.csv", encoding="ISO-8859-1")
-df_pop = pd.read_csv("PoblacionPeru2020.csv", encoding = "ISO-8859-1")
+df_pop = pd.read_csv("PoblacionPeru2020.csv")#, encoding = "ISO-8859-1")
 
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
     df_pos['FECHA_RESULTADO'], format="%Y%m%d")
@@ -138,12 +138,20 @@ df_pos['FECHA_RESULTADO'] = pd.to_datetime(
 df_pos.DISTRITO = df_pos.DISTRITO.str.replace('Ñ', 'N')
 df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ñ', 'N')
 
+df_pop.DISTRITO = df_pop.DISTRITO.str.replace('Ñ', 'N')
+df_pop.PROVINCIA = df_pop.PROVINCIA.str.replace('Ñ', 'N')
+
 df_pos.DISTRITO = df_pos.DISTRITO.str.replace('.', '')
 df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('.', '')
+
+df_pop.DISTRITO = df_pop.DISTRITO.str.replace('.', '')
+df_pop.PROVINCIA = df_pop.PROVINCIA.str.replace('.', '')
 
 df_pos.DISTRITO = df_pos.DISTRITO.str.replace('Ó', 'O')
 df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ó', 'O')
 
+df_pop.DISTRITO = df_pop.DISTRITO.str.replace('Ó', 'O')
+df_pop.PROVINCIA = df_pop.PROVINCIA.str.replace('Ó', 'O')
 
 try:
     arg = sys.argv[1]
@@ -182,10 +190,10 @@ for department in all_departments:
 
 #-------------------------Create plots for per capita results----------------------------
 
-if arg == "noimages":
-    all_departments = list()
-else:
-    all_departments = list(df_pop.DEPARTAMENTO.unique())
+# if arg == "noimages":
+    # all_departments = list()
+# else:
+all_departments = list(df_pop.DEPARTAMENTO.unique())
 
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 
@@ -226,8 +234,8 @@ for department in all_departments:
         print(province, district_risks)
 
         try:
-            cases_text1 = 'Positivos de Ultima Semana por 100,000 (Sospecho de Peligro Actual)'
-            cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Personas'
+            cases_text1 = 'Casos Ultm. 7 Dias por 100K Hab. (Sospecho de Peligro Actual)'
+            cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Habitantes'
             cases_path1 = department + '/' + province + '/' + province + danger_img_name
             cases_path2 = department + '/' + province + '/' + province + casenum_img_nm
             bar_h_covid(district_risks, cases_text1, cases_path1, True, True)
