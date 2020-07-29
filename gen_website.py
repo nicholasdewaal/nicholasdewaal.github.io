@@ -83,14 +83,14 @@ def clr(in_num):
     '''
     Define color for plots based on ranges of new weekly covid-19 cases per
     100000 people in a region.
-    Red means high risk is above 17, orange above 10, yellow above 5, green
+    Red means high risk, orange means medium risk, yellow medium-low, green
     otherwise.
     '''
-    if in_num > 17:
+    if in_num > 35: # 35 is about half of the peak of Spain's worst point during pandemic
         return "red"
-    elif in_num > 10:
+    elif in_num > 15:
         return "orange"
-    elif in_num > 5:
+    elif in_num > 8:  # 8 is the level in Germany during free movement
         return "yellow"
     return "green"
 
@@ -166,7 +166,7 @@ else:
 total_cases = dict()  # total cases by district
 
 # Department > Provinces > Districts
-# Generate and save all plots
+# Generate and save all case growth plots
 for department in all_departments:
     make_dir(department)
     df_department = df_pos[df_pos.DEPARTAMENTO == department]
@@ -190,10 +190,10 @@ for department in all_departments:
 
 #-------------------------Create plots for per capita results----------------------------
 
-# if arg == "noimages":
-    # all_departments = list()
-# else:
-all_departments = list(df_pop.DEPARTAMENTO.unique())
+if arg == "noimages":
+    all_departments = list()
+else:
+    all_departments = list(df_pop.DEPARTAMENTO.unique())
 
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 
