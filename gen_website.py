@@ -4,6 +4,7 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from ipdb import set_trace
 
 attribution = '    </br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
 attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
@@ -109,14 +110,16 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
 
     if num_bars > 0:
         plt.subplots(figsize=(width, num_bars / 6 + 1.7))
-        # Limit max length of extreme values in bar plot to 2.5 times
+        # Limit max length of extreme values in bar plot to 5 times
         # average value size / bar length
         legend, values = zip(*plot_dict.items())
         legend = [titulo(x[:n_chars_plot]) for x in legend]
         if limit_extremes:
-            value_average = sum(values) / len(values)
+            #exclude zeros in average
+            value_average = sum(values) / (len(values) - sum(1 for x in values
+                                                             if x==0))
             if max(values) / 2 > value_average:
-                plot_limit = min(max(values) / 2, 2.5 * value_average)
+                plot_limit = min(max(values) / 2, 5 * value_average)
                 plt.xlim(0, plot_limit)
 
         plt.figtext(.5,.9, figure_txt, fontsize=14, ha='center')
@@ -190,10 +193,10 @@ for department in all_departments:
 
 #-------------------------Create plots for per capita results----------------------------
 
-if arg == "noimages":
-    all_departments = list()
-else:
-    all_departments = list(df_pop.DEPARTAMENTO.unique())
+# if arg == "noimages":
+    # all_departments = list()
+# else:
+all_departments = list(df_pop.DEPARTAMENTO.unique())
 
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 
@@ -215,6 +218,13 @@ for department in all_departments:
 
             df_district = df_pos[df_pos.PROVINCIA==province][df_pos.DISTRITO==district]
             df_bars = df_district.groupby([df_district.FECHA_RESULTADO]).size()
+            min_date = df_bars.index.min()
+            max_date = df_pos.FECHA_RESULTADO.max()
+            try:
+                idx = pd.date_range(min_date, max_date)
+                df_bars = df_bars.reindex(idx, fill_value=0)
+            except:
+                print("No times for ", district)
             df_avg = df_bars.rolling(7).mean()
 
             try:
