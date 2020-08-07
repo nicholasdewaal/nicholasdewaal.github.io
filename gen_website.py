@@ -16,6 +16,7 @@ len_danger = len(danger_img_name)
 casenum_img_nm = "_casos_total.png"
 len_casenum = len(casenum_img_nm)
 
+
 def add_line(in_file, line):
     with open(in_file, 'a') as file:
         file.write('\n' + line)
@@ -55,6 +56,13 @@ def gen_plot(df_in, save_path):
     '''
     if df_in.shape[0] > 20:
         df_bars = df_in.groupby([df_in.FECHA_RESULTADO]).size()
+
+        # Zero fill missing dates
+        min_date = df_bars.index.min()
+        max_date = df_in.FECHA_RESULTADO.max()
+        idx = pd.date_range(min_date, max_date)
+        df_bars = df_bars.reindex(idx, fill_value=0)
+
         df_avg = df_bars.rolling(7).mean()
         df_avg.name = "Por medio de los 7 dias anteriores"
         fig, ax = plt.subplots()
@@ -119,7 +127,7 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
             value_average = sum(values) / (len(values) - sum(1 for x in values
                                                              if x==0))
             if max(values) / 2 > value_average:
-                plot_limit = min(max(values) / 2, 5 * value_average)
+                plot_limit = min(max(values), 3 * value_average)
                 plt.xlim(0, plot_limit)
 
         plt.figtext(.5,.9, figure_txt, fontsize=14, ha='center')
@@ -127,6 +135,10 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
             plt.barh(legend, values, color=list(map(clr, values)))
         else:
             plt.barh(legend, values)
+
+        x_loc = max(values) / 20
+        for index, value in enumerate(values):
+            plt.text(x_loc, index, str(value))
         plt.savefig(save_path)
         plt.close()
 
@@ -190,6 +202,7 @@ for department in all_departments:
             df_district = df_province[df_province.DISTRITO == district]
             total_cases[district] = df_district.shape[0]
             gen_plot(df_district, save_path)
+    print("Finished plots for", department)
 
 #-------------------------Create plots for per capita results----------------------------
 
@@ -201,6 +214,7 @@ all_departments = list(df_pop.DEPARTAMENTO.unique())
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 
 failed_districts = list()
+
 
 for department in all_departments:
     all_provinces = list(df_pop[df_pop.DEPARTAMENTO==department].PROVINCIA.unique())
