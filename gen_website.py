@@ -14,7 +14,7 @@ attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyof
 attribution += '\n    </br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
 
 # Some constants used for image names
-danger_img_name = "_peligro.png"
+danger_img_name = "_1peligro.png"
 len_danger = len(danger_img_name)
 casenum_img_nm = "_casos_total.png"
 len_casenum = len(casenum_img_nm)
@@ -126,7 +126,7 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
     n_chars_plot = 16
 
     if num_bars > 0:
-        plt.subplots(figsize=(width, num_bars / 6 + 1.7))
+        plt.subplots(figsize=(width, num_bars / 6 + 2.9))
         # Limit max length of extreme values in bar plot to 5 times
         # average value size / bar length
         legend, values = zip(*plot_dict.items())
@@ -139,15 +139,16 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
                 plot_limit = min(max(values), 3 * value_average)
                 plt.xlim(0, plot_limit)
 
-        plt.figtext(.5,.9, figure_txt, fontsize=14, ha='center')
+        plt.figtext(.5,.9, figure_txt, fontsize=13, ha='center')
         if colorize:
             plt.barh(legend, values, color=list(map(clr, values)))
+            plt.xlabel("Sospecho de peligro actual. Rojo es alto peligro, verde es leve.", fontsize=9)
         else:
             plt.barh(legend, values, color="lightskyblue")
 
         x_loc = max(values) / 20
         for index, value in enumerate(values):
-            plt.text(x_loc, index, str(value), fontsize="small")
+            plt.text(x_loc, index, str(value), fontsize="x-small")
         plt.savefig(save_path)
         plt.close()
 
@@ -224,7 +225,7 @@ failed_districts = list()
 # else:
 all_departments = list(df_pop.DEPARTAMENTO.unique())
 
-cases_text1 = 'Casos Ultm. 7 Dias por 100K Hab. (Sospecho de Peligro Actual)'
+cases_text1 = 'Casos Nuevos en los Ultimos 7 Dias por 100,000 Habitantes'
 cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Habitantes'
 
 # Do risk plots by Department
@@ -292,7 +293,7 @@ for department in all_departments:
             except:
                 failed_districts.append((district, df_pop[df_pop.PROVINCIA==province][df_pop.DISTRITO==district].Population.values[0]))
 
-        print(province, district_risks)
+        print("Finished plots for", province, "province")
 
         try:
             cases_path1 = department + '/' + province + '/' + province + danger_img_name
