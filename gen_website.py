@@ -3,8 +3,11 @@ import os
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+# plt.xkcd()
 import numpy as np
 # from ipdb import set_trace
+# import locale
+# locale.setlocale(locale.LC_TIME,'es_ES.UTF-8')
 
 attribution = '    </br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
 attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
@@ -68,11 +71,11 @@ def gen_plot(df_in, save_path):
         fig, ax = plt.subplots()
         df_avg.plot(
             ax=ax,
-            color="green",
+            color="maroon",
             title="Casos Nuevos Detectados en " +
             titulo(save_path),
             legend=True)
-        ax.bar(df_bars.index, df_bars.values)
+        ax.bar(df_bars.index, df_bars.values, color="gray")
         plt.tight_layout()
         x_axis = ax.axes.get_xaxis()
         x_label = x_axis.get_label()
@@ -95,12 +98,18 @@ def clr(in_num):
     Red means high risk, orange means medium risk, yellow medium-low, green
     otherwise.
     '''
-    if in_num > 35: # 35 is about half of the peak of Spain's worst point during pandemic
+    if in_num > 38: # 35 is about half of the peak of Spain's worst point during pandemic
         return "red"
-    elif in_num > 15:
+    elif in_num > 28:
+        return "orangered"
+    elif in_num > 19:
         return "orange"
-    elif in_num > 8:  # 8 is the level in Germany during free movement
+    elif in_num > 12:
+        return "gold"
+    elif in_num > 9:
         return "yellow"
+    elif in_num > 6:  # 8 is the level in Germany during free movement
+        return "yellowgreen"
     return "green"
 
 
@@ -134,11 +143,11 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
         if colorize:
             plt.barh(legend, values, color=list(map(clr, values)))
         else:
-            plt.barh(legend, values)
+            plt.barh(legend, values, color="lightskyblue")
 
         x_loc = max(values) / 20
         for index, value in enumerate(values):
-            plt.text(x_loc, index, str(value))
+            plt.text(x_loc, index, str(value), fontsize="small")
         plt.savefig(save_path)
         plt.close()
 
@@ -240,8 +249,9 @@ for dep in all_departments:
     # pct of total infections in a Department
     total_positive[dep] = df_dep.shape[0] / dep_pop
     dep_risks[dep] = df_avg[-1] / dep_pop
-    bar_h_covid(dep_risks, cases_text1 + "/Departamento", "Departamento" + danger_img_name, True, True)
-    bar_h_covid(total_positive, cases_text2 + "/Departamento", "Departamento" + casenum_img_nm)
+
+bar_h_covid(dep_risks, cases_text1 + "/Departamento", "Departamento" + danger_img_name, True, True)
+bar_h_covid(total_positive, cases_text2 + "/Departamento", "Departamento" + casenum_img_nm)
 
 for department in all_departments:
     all_provinces = list(df_pop[df_pop.DEPARTAMENTO==department].PROVINCIA.unique())
