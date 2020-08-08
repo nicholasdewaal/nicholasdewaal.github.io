@@ -4,7 +4,7 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from ipdb import set_trace
+# from ipdb import set_trace
 
 attribution = '    </br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
 attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
@@ -150,6 +150,7 @@ df_pop = pd.read_csv("PoblacionPeru2020.csv")#, encoding = "ISO-8859-1")
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
     df_pos['FECHA_RESULTADO'], format="%Y%m%d")
 
+# Get rid of characters that are inconvenient to deal with
 df_pos.DISTRITO = df_pos.DISTRITO.str.replace('Ñ', 'N')
 df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ñ', 'N')
 
@@ -180,6 +181,7 @@ else:
 
 total_cases = dict()  # total cases by district
 
+gen_plot(df_pos, "Todo Peru")
 # Department > Provinces > Districts
 # Generate and save all case growth plots
 for department in all_departments:
@@ -206,15 +208,40 @@ for department in all_departments:
 
 #-------------------------Create plots for per capita results----------------------------
 
+plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
+failed_districts = list()
 # if arg == "noimages":
     # all_departments = list()
 # else:
 all_departments = list(df_pop.DEPARTAMENTO.unique())
 
-plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
+cases_text1 = 'Casos Ultm. 7 Dias por 100K Hab. (Sospecho de Peligro Actual)'
+cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Habitantes'
 
-failed_districts = list()
+# Do risk plots by Department
+total_positive = dict()
+dep_sizes = dict()
+dep_risks = dict()
 
+for dep in all_departments:
+    if dep == "LIMA":
+        df_dep = df_pos[df_pos.DEPARTAMENTO.isin(["LIMA REGION", "LIMA"])]
+    else:
+        df_dep = df_pos[df_pos.DEPARTAMENTO==dep]
+    df_bars = df_dep.groupby([df_dep.FECHA_RESULTADO]).size()
+    min_date = df_bars.index.min()
+    max_date = df_pos.FECHA_RESULTADO.max()
+    idx = pd.date_range(min_date, max_date)
+    df_bars = df_bars.reindex(idx, fill_value=0)
+    df_avg = df_bars.rolling(7).mean()
+
+    # Population of a department
+    dep_pop = df_pop[df_pop.DEPARTAMENTO==dep].Population.sum()
+    # pct of total infections in a Department
+    total_positive[dep] = df_dep.shape[0] / dep_pop
+    dep_risks[dep] = df_avg[-1] / dep_pop
+    bar_h_covid(dep_risks, cases_text1 + "/Departamento", "Departamento" + danger_img_name, True, True)
+    bar_h_covid(total_positive, cases_text2 + "/Departamento", "Departamento" + casenum_img_nm)
 
 for department in all_departments:
     all_provinces = list(df_pop[df_pop.DEPARTAMENTO==department].PROVINCIA.unique())
@@ -258,8 +285,6 @@ for department in all_departments:
         print(province, district_risks)
 
         try:
-            cases_text1 = 'Casos Ultm. 7 Dias por 100K Hab. (Sospecho de Peligro Actual)'
-            cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Habitantes'
             cases_path1 = department + '/' + province + '/' + province + danger_img_name
             cases_path2 = department + '/' + province + '/' + province + casenum_img_nm
             bar_h_covid(district_risks, cases_text1, cases_path1, True, True)
