@@ -220,9 +220,6 @@ for department in all_departments:
 
 plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
 failed_districts = list()
-# if arg == "noimages":
-    # all_departments = list()
-# else:
 all_departments = list(df_pop.DEPARTAMENTO.unique())
 
 cases_text1 = 'Casos Nuevos en los Ultimos 7 Dias por 100,000 Habitantes'
@@ -244,7 +241,6 @@ for dep in all_departments:
     idx = pd.date_range(min_date, max_date)
     df_bars = df_bars.reindex(idx, fill_value=0)
     df_avg = df_bars.rolling(7).mean()
-
     # Population of a department
     dep_pop = df_pop[df_pop.DEPARTAMENTO==dep].Population.sum()
     # pct of total infections in a Department
@@ -254,6 +250,8 @@ for dep in all_departments:
 bar_h_covid(dep_risks, cases_text1 + "/Departamento", "Departamento" + danger_img_name, True, True)
 bar_h_covid(total_positive, cases_text2 + "/Departamento", "Departamento" + casenum_img_nm)
 
+if arg == "noimages":
+    all_departments = list()
 for department in all_departments:
     all_provinces = list(df_pop[df_pop.DEPARTAMENTO==department].PROVINCIA.unique())
 
@@ -366,7 +364,9 @@ for department in all_departments:
             add_line(
                 province_link,
                 "    <h3>\n      <a href=../../index.html>Regresar a casos por Departamento</a>\n    </h3>")
-
+            add_line(
+                province_link,
+                "    <h4>\n Tome en cuenta que es común tener casos reportados en un distrito donde personas no viven a veces causando resultados exageradamente alto o bajo y sesgos en los datos. Por eso, interprete los resultados como tendencias del distrito y sus distritos cercanos.\n    </h4>")
             for image in province_images:
                 # Place summary images 1st.
                 risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
