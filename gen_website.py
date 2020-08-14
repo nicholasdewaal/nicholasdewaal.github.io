@@ -67,7 +67,7 @@ def gen_plot(df_in, save_path):
         df_bars = df_bars.reindex(idx, fill_value=0)
 
         df_avg = df_bars.rolling(7).mean()
-        df_avg.name = "Por medio de los 7 dias anteriores"
+        df_avg.name = "Promedio de los 7 dias anteriores"
         fig, ax = plt.subplots()
         df_avg.plot(
             ax=ax,
