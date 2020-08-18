@@ -5,7 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # plt.xkcd()
 import numpy as np
-# from ipdb import set_trace
+from ipdb import set_trace
+# import datetime
 # import locale
 # locale.setlocale(locale.LC_TIME,'es_ES.UTF-8')
 
@@ -75,7 +76,9 @@ def gen_plot(df_in, save_path):
             title="Casos Nuevos Detectados en " +
             titulo(save_path),
             legend=True)
-        ax.bar(df_bars.index, df_bars.values, color="gray")
+        # set_trace()
+        ax.bar(df_bars.index, df_bars.values,
+               color="gray", width=np.timedelta64(1, 'D'))
         plt.tight_layout()
         x_axis = ax.axes.get_xaxis()
         x_label = x_axis.get_label()
