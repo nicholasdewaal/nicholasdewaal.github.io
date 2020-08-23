@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # plt.xkcd()
 import numpy as np
-from ipdb import set_trace
+#from ipdb import set_trace
 # import datetime
 # import locale
 # locale.setlocale(locale.LC_TIME,'es_ES.UTF-8')
@@ -181,6 +181,15 @@ df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ó', 'O')
 
 df_pop.DISTRITO = df_pop.DISTRITO.str.replace('Ó', 'O')
 df_pop.PROVINCIA = df_pop.PROVINCIA.str.replace('Ó', 'O')
+
+# Only look at PCR tests
+# df_pos = df_pos[df_pos.METODODX=="PCR"]
+
+# Usually data that just came in is incomplete for the most recent day, so
+# remove it.
+mx_date = df_pos.FECHA_RESULTADO.max()
+df_pos = df_pos[df_pos.FECHA_RESULTADO < mx_date]
+
 
 try:
     arg = sys.argv[1]
