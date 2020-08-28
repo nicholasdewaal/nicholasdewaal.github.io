@@ -3,15 +3,11 @@ import os
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
-# plt.xkcd()
 import numpy as np
 #from ipdb import set_trace
-# import datetime
-# import locale
-# locale.setlocale(locale.LC_TIME,'es_ES.UTF-8')
 
 attribution = '    </br> Fuente de los datos utilizados: <a href="https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-de-salud-minsa"> Instituto Nacional de Salud y Centro Nacional de Epidemiologia, prevención y Control de Enfermedades – MINSA. </a>'
-attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos de MINSA</a>'
+attribution += '\n    </br></br> <a href="https://cloud.minsa.gob.pe/apps/onlyoffice/s/XJ3NoG3WsxgF6H8?fileId=613439">Datos Demograficos Utilizado</a>'
 attribution += '\n    </br></br> <a href="https://github.com/nicholasdewaal/nicholasdewaal.github.io/blob/master/gen_website.py">Fuente del codigo</a> usado para generar este sitio web.</br></br></br></br>'
 
 # Some constants used for image names
@@ -91,7 +87,9 @@ def sort_dict(in_dict, reverse=False, multiply_factor=1):
     '''
     Sort in_dict by its values, and multiply values by multiply_factor
     '''
-    return {k: round(v * multiply_factor, 1) for k, v in sorted(in_dict.items(), key=lambda item: item[1], reverse=reverse)}
+    return {k: round( v * multiply_factor, 1)
+        for k, v in sorted(in_dict.items(), key=lambda item: item[1],
+            reverse=reverse)}
 
 
 def clr(in_num):
@@ -101,7 +99,8 @@ def clr(in_num):
     Red means high risk, orange means medium risk, yellow medium-low, green
     otherwise.
     '''
-    if in_num > 38: # 35 is about half of the peak of Spain's worst point during pandemic
+    # 35 is about half of the peak of Spain's worst point during pandemic
+    if in_num > 38:
         return "red"
     elif in_num > 28:
         return "orangered"
@@ -111,7 +110,8 @@ def clr(in_num):
         return "gold"
     elif in_num > 9:
         return "yellow"
-    elif in_num > 6:  # 8 is the level in Germany during free movement
+    # 8 is the level in Germany during free movement
+    elif in_num > 6:
         return "yellowgreen"
     return "green"
 
@@ -124,7 +124,7 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
     colorize: set to True if you want to color bars by covid danger.
     '''
     plot_dict = sort_dict(in_plot_dict, multiply_factor=100000)
-    width = 8 # width of plot
+    width = 8  # width of plot
     num_bars = len(plot_dict)
     n_chars_plot = 16
 
@@ -135,17 +135,19 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
         legend, values = zip(*plot_dict.items())
         legend = [titulo(x[:n_chars_plot]) for x in legend]
         if limit_extremes:
-            #exclude zeros in average
+            # exclude zeros in average
             value_average = sum(values) / (len(values) - sum(1 for x in values
-                                                             if x==0))
+                                                             if x == 0))
             if max(values) / 2 > value_average:
                 plot_limit = min(max(values), 3 * value_average)
                 plt.xlim(0, plot_limit)
 
-        plt.figtext(.5,.9, figure_txt, fontsize=13, ha='center')
+        plt.figtext(.5, .9, figure_txt, fontsize=13, ha='center')
         if colorize:
             plt.barh(legend, values, color=list(map(clr, values)))
-            plt.xlabel("Sospecho de peligro actual. Rojo es alto peligro, verde es leve.", fontsize=9)
+            plt.xlabel(
+                "Sospecho de peligro actual. Rojo es alto peligro, verde es leve.",
+                fontsize=9)
         else:
             plt.barh(legend, values, color="lightskyblue")
 
@@ -158,7 +160,7 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
 
 # Make dataframes from csv files.
 df_pos = pd.read_csv("positivos_covid.csv", encoding="ISO-8859-1")
-df_pop = pd.read_csv("PoblacionPeru2020.csv")#, encoding = "ISO-8859-1")
+df_pop = pd.read_csv("PoblacionPeru2020.csv")
 
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
     df_pos['FECHA_RESULTADO'], format="%Y%m%d")
@@ -182,7 +184,7 @@ df_pos.PROVINCIA = df_pos.PROVINCIA.str.replace('Ó', 'O')
 df_pop.DISTRITO = df_pop.DISTRITO.str.replace('Ó', 'O')
 df_pop.PROVINCIA = df_pop.PROVINCIA.str.replace('Ó', 'O')
 
-# Only look at PCR tests
+# Uncomment the line below to only look at results for PCR tests
 # df_pos = df_pos[df_pos.METODODX=="PCR"]
 
 # Usually data that just came in is incomplete for the most recent day, so
@@ -228,9 +230,9 @@ for department in all_departments:
             gen_plot(df_district, save_path)
     print("Finished plots for", department)
 
-#-------------------------Create plots for per capita results----------------------------
+# -------------------------Create plots for per capita results------------
 
-plt.rc('ytick', labelsize=7.5) # set size of font on y-axis for bar plots
+plt.rc('ytick', labelsize=7.5)  # set size of font on y-axis for bar plots
 failed_districts = list()
 all_departments = list(df_pop.DEPARTAMENTO.unique())
 
@@ -246,7 +248,7 @@ for dep in all_departments:
     if dep == "LIMA":
         df_dep = df_pos[df_pos.DEPARTAMENTO.isin(["LIMA REGION", "LIMA"])]
     else:
-        df_dep = df_pos[df_pos.DEPARTAMENTO==dep]
+        df_dep = df_pos[df_pos.DEPARTAMENTO == dep]
     df_bars = df_dep.groupby([df_dep.FECHA_RESULTADO]).size()
     min_date = df_bars.index.min()
     max_date = df_pos.FECHA_RESULTADO.max()
@@ -254,43 +256,45 @@ for dep in all_departments:
     df_bars = df_bars.reindex(idx, fill_value=0)
     df_avg = df_bars.rolling(7).mean()
     # Population of a department
-    dep_pop = df_pop[df_pop.DEPARTAMENTO==dep].Population.sum()
+    dep_pop = df_pop[df_pop.DEPARTAMENTO == dep].Population.sum()
     # pct of total infections in a Department
     total_positive[dep] = df_dep.shape[0] / dep_pop
     dep_risks[dep] = df_avg[-1] / dep_pop
 
-bar_h_covid(dep_risks, cases_text1 + "/Departamento", "Departamento" + danger_img_name, True, True)
-bar_h_covid(total_positive, cases_text2 + "/Departamento", "Departamento" + casenum_img_nm)
+bar_h_covid(dep_risks, cases_text1 + "/Departamento",
+            "Departamento" + danger_img_name, True, True)
+bar_h_covid(total_positive, cases_text2 + "/Departamento",
+            "Departamento" + casenum_img_nm)
 
 if arg == "noimages":
     all_departments = list()
 for department in all_departments:
-    all_provinces = list(df_pop[df_pop.DEPARTAMENTO==department].PROVINCIA.unique())
+    all_provinces = list(
+        df_pop[df_pop.DEPARTAMENTO == department].PROVINCIA.unique())
 
     for province in all_provinces:
-        districts = df_pop[df_pop.PROVINCIA==province].DISTRITO.unique()
+        districts = df_pop[df_pop.PROVINCIA == province].DISTRITO.unique()
 
         total_positive = dict()
-        districts = list(districts)
-        districts.sort()
-        district_sizes = dict() # population of a district
-        district_risks = dict() # risk level by district
+        districts = sorted(districts)
+        district_sizes = dict()  # population of a district
+        district_risks = dict()  # risk level by district
 
         for district in districts:
 
-            df_district = df_pos[df_pos.PROVINCIA==province][df_pos.DISTRITO==district]
+            df_district = df_pos[df_pos.PROVINCIA == province][df_pos.DISTRITO == district]
             df_bars = df_district.groupby([df_district.FECHA_RESULTADO]).size()
             min_date = df_bars.index.min()
             max_date = df_pos.FECHA_RESULTADO.max()
             try:
                 idx = pd.date_range(min_date, max_date)
                 df_bars = df_bars.reindex(idx, fill_value=0)
-            except:
+            except BaseException:
                 print("No times for ", district)
             df_avg = df_bars.rolling(7).mean()
 
             try:
-                district_size = df_pop[df_pop.PROVINCIA==province][df_pop.DISTRITO==district].Population.values[0]
+                district_size = df_pop[df_pop.PROVINCIA == province][df_pop.DISTRITO == district].Population.values[0]
                 factor = df_district.shape[0] / district_size
                 if factor > 0:
                     district_sizes[district] = district_size
@@ -300,8 +304,9 @@ for department in all_departments:
                     district_risk_factor = df_avg[-1] / district_sizes[district]
                     district_risks[district] = district_risk_factor
 
-            except:
-                failed_districts.append((district, df_pop[df_pop.PROVINCIA==province][df_pop.DISTRITO==district].Population.values[0]))
+            except BaseException:
+                failed_districts.append(
+                    (district, df_pop[df_pop.PROVINCIA == province][df_pop.DISTRITO == district].Population.values[0]))
 
         print("Finished plots for", province, "province")
 
@@ -310,14 +315,16 @@ for department in all_departments:
             cases_path2 = department + '/' + province + '/' + province + casenum_img_nm
             bar_h_covid(district_risks, cases_text1, cases_path1, True, True)
             bar_h_covid(total_positive, cases_text2, cases_path2)
-        except: # when Lima region shows up
-            cases_path1 = department + ' REGION/' + province + '/' + province + danger_img_name
-            cases_path2 = department + ' REGION/' + province + '/' + province + casenum_img_nm
+        except BaseException:  # when Lima region shows up
+            cases_path1 = department + ' REGION/' + \
+                province + '/' + province + danger_img_name
+            cases_path2 = department + ' REGION/' + \
+                province + '/' + province + casenum_img_nm
             bar_h_covid(district_risks, cases_text1, cases_path1, True, True)
             bar_h_covid(total_positive, cases_text2, cases_path2)
 
 
-#-------------------------Create all html pages----------------------------
+# -------------------------Create all html pages----------------------------
 
 all_departments = next(os.walk("."))[1]
 
@@ -330,9 +337,7 @@ for department in all_departments:
     add_line(department_link, "<html>\n  <head>\n  </head>\n  <body>")
     add_line(
         department_link,
-        "    <h1>Casos de COVID-19 en " +
-        department +
-        " por Provincia</h1>")
+        "    <h1>Casos de COVID-19 en " + department + " por Provincia</h1>")
     add_line(
         department_link,
         "    <h2>Seleccione la foto de una Provincia para ver sus detalles por Distrito.</h2>")
@@ -368,11 +373,8 @@ for department in all_departments:
                 "<html>\n  <head>\n  </head>\n  <body>")
             add_line(
                 province_link,
-                "    <h1>Casos de COVID-19 en " +
-                department +
-                " / " +
-                province +
-                " por Distrito</h1>")
+                "    <h1>Casos de COVID-19 en " + department + " / " +
+                province + " por Distrito</h1>")
             add_line(
                 province_link,
                 "    <h3>\n      <a href=../../index.html>Regresar a casos por Departamento</a>\n    </h3>")
@@ -387,11 +389,7 @@ for department in all_departments:
             for image in province_images:
                 risk_image = (image[-len_casenum:] == casenum_img_nm or image[-len_danger:] == danger_img_name)
                 if image[-3:] == "png" and image[:6] != "EN INV" and not(risk_image):
-                    add_line(
-                        province_link,
-                        '    <img src="' +
-                        image +
-                        '">')
+                    add_line(province_link, '    <img src="' + image + '">')
 
             add_line(province_link, attribution)
             add_line(province_link, "</body>\n</html>")
