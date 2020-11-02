@@ -159,7 +159,7 @@ def bar_h_covid(in_plot_dict, figure_txt, save_path,
 
 
 # Make dataframes from csv files.
-df_pos = pd.read_csv("positivos_covid.csv", encoding="ISO-8859-1")
+df_pos = pd.read_csv("positivos_covid.csv", sep=';', encoding="ISO-8859-1")
 df_pop = pd.read_csv("PoblacionPeru2020.csv")
 
 df_pos['FECHA_RESULTADO'] = pd.to_datetime(
@@ -200,6 +200,8 @@ except BaseException:
 
 if arg == "noimages":
     all_departments = list()
+elif arg == "local":
+    all_departments = ["LIMA", "LIMA REGION", "ICA", "CALLAO"]
 else:
     all_departments = list(df_pos.DEPARTAMENTO.unique())
 
@@ -235,6 +237,9 @@ for department in all_departments:
 plt.rc('ytick', labelsize=7.5)  # set size of font on y-axis for bar plots
 failed_districts = list()
 all_departments = list(df_pop.DEPARTAMENTO.unique())
+
+if arg == "local":
+    all_departments = ["LIMA", "ICA", "CALLAO"]
 
 cases_text1 = 'Casos Nuevos en los Ultimos 7 Dias por 100,000 Habitantes'
 cases_text2 = 'Total de Casos Historicos Detectados por 100,000 Habitantes'
