@@ -190,7 +190,7 @@ df_pop.PROVINCIA = df_pop.PROVINCIA.str.replace('Ó', 'O')
 # Usually data that just came in is incomplete for the most recent day, so
 # remove it.
 mx_date = df_pos.FECHA_RESULTADO.max()
-min_date = mx_date - 365
+min_date = mx_date - pd.Timedelta(days=365)
 df_pos = df_pos[df_pos.FECHA_RESULTADO < mx_date]
 df_pos = df_pos[df_pos.FECHA_RESULTADO > min_date]
 
