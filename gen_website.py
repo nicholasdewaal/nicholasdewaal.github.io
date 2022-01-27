@@ -80,7 +80,7 @@ def gen_plot(df_in, save_path):
         x_label = x_axis.get_label()
         x_label.set_visible(False)
         plt.savefig(save_path + ".png", dpi=120)
-        plt.clf()
+        plt.close()
 
 
 def sort_dict(in_dict, reverse=False, multiply_factor=1):
